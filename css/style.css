@@ -1,0 +1,214 @@
+/* Clicker Pawry - Styles principaux */
+
+/* Variables CSS - Palette de couleurs */
+:root {
+  /* Palette sombre pour échiquier */
+  --bg: #111111;
+  --p1: #6b7bb8; /* bleu plus clair pour les cases claires */
+  --p2: #3a4374; /* bleu plus foncé pour les cases sombres */
+  --accent: #39a8ff; /* bleu accent */
+  --accent2: #e34a4a; /* rouge accent */
+}
+
+/* Reset et base */
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  color: #fff;
+  /* Échiquier parfait avec mouvement diagonal */
+  background: 
+    /* Création de l'échiquier avec masque */ repeating-conic-gradient(
+        var(--p1) 0% 25%,
+        var(--p2) 25% 50%
+      )
+      0 0/100px 100px,
+    repeating-conic-gradient(var(--p2) 0% 25%, var(--p1) 25% 50%) 50px 50px/100px
+      100px;
+  animation: checkerboard-diagonal 25s linear infinite;
+}
+
+#cv {
+  display: block; /* supprime l'espace inline */
+  max-width: 100vw;
+  max-height: 100vh;
+}
+
+/* Animations */
+@keyframes checkerboard-diagonal {
+  0% {
+    background-position: 0 0, 50px 50px;
+  }
+  100% {
+    background-position: 100px 100px, 150px 150px;
+  }
+}
+
+/* Écran d'accueil */
+.start-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  color: #111;
+  /* L'overlay est transparent pour laisser voir le fond animé */
+  background: transparent;
+}
+
+.start-card {
+  background: rgba(17, 17, 17, 0.9);
+  color: #fff;
+  padding: 24px 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  width: min(92vw, 420px);
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.title {
+  margin: 0 0 6px 0;
+  font-size: 1.6rem;
+  letter-spacing: 0.5px;
+}
+
+.tagline {
+  margin: 0 0 16px 0;
+  color: #cfd8e3;
+  font-size: 0.95rem;
+}
+
+.btns {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* Boutons */
+button.btn {
+  appearance: none;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #111;
+  background: var(--p1);
+  transition: transform 0.06s ease, box-shadow 0.2s ease, background 0.3s ease;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
+}
+
+button.btn:hover {
+  transform: translateY(-1px);
+}
+
+button.btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+button.btn.alt {
+  background: var(--p2);
+}
+
+button.btn.secondary {
+  background: #555;
+  color: #fff;
+}
+
+button.btn.danger {
+  background: var(--accent2);
+  color: #fff;
+}
+
+button.btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Modal styles */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: rgba(17, 17, 17, 0.95);
+  color: #fff;
+  padding: 0;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  width: min(90vw, 500px);
+  max-height: 80vh;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: var(--accent);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.modal-body {
+  padding: 20px 24px 24px;
+}
+
+.howto-section {
+  margin-bottom: 20px;
+}
+
+.howto-section:last-child {
+  margin-bottom: 0;
+}
+
+.howto-section h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  color: var(--accent);
+}
+
+.howto-section p {
+  margin: 4px 0;
+  line-height: 1.4;
+  color: #e0e0e0;
+}
+
+.howto-section p strong {
+  color: #fff;
+}

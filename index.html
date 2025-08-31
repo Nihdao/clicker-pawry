@@ -1,13 +1,94 @@
 <!DOCTYPE html>
-<html lang="en">    
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Clicker Pawry</title>
-    <!-- <link rel="stylesheet" href="styles.css"> -->
-    <!-- <script defer src="script.js"></script>
-    <link rel="icon" href="favicon.ico" type="image/x-icon"> -->
-</head>
-<body>
+    <meta
+      name="description"
+      content="A black cat clicker roguelite with parry timing mechanics."
+    />
+    <meta name="theme-color" content="#111111" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <!-- Start screen -->
+    <div
+      id="start"
+      class="start-screen"
+      role="dialog"
+      aria-labelledby="t"
+      aria-modal="true"
+    >
+      <div class="start-card">
+        <h1 id="t" class="title">Clicker Pawry</h1>
+        <p class="tagline">A Black Cat Clicker Roguelite with Parry Timing</p>
+        <div class="btns">
+          <button id="btn-new" class="btn">🐾 New Game</button>
+          <button id="btn-continue" class="btn alt" style="display: none">
+            📦 Continue
+          </button>
+          <button id="btn-howto" class="btn secondary">❓ How To Play</button>
+          <button id="btn-clear" class="btn danger">🗑️ Clear Data</button>
+        </div>
+      </div>
+    </div>
 
+    <!-- Modal How To Play -->
+    <div id="howto-modal" class="modal" style="display: none">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>How To Play</h2>
+          <button id="close-howto" class="close-btn">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="howto-section">
+            <h3>🎯 Controls</h3>
+            <p><strong>Tap/Click on enemy:</strong> Attack (costs stamina)</p>
+            <p>
+              <strong>Tap/Click with ring timing:</strong> Parry incoming
+              attacks
+            </p>
+            <p>
+              <strong>Active Skills:</strong> Use the buttons in bottom-right
+            </p>
+          </div>
+          <div class="howto-section">
+            <h3>⚔️ Combat</h3>
+            <p>
+              <strong>White rings:</strong> Normal attacks - parry to avoid
+              damage
+            </p>
+            <p>
+              <strong>Blue rings:</strong> Feints - don't attack during the
+              first 200ms!
+            </p>
+            <p><strong>Red rings:</strong> Heavy attacks - MUST be parried</p>
+          </div>
+          <div class="howto-section">
+            <h3>🎮 Parry Timing</h3>
+            <p>
+              <strong>Perfect (±80ms):</strong> Counter attack for 2× damage
+            </p>
+            <p><strong>Good (±160ms):</strong> Block the attack</p>
+            <p><strong>Miss:</strong> Take damage</p>
+          </div>
+          <div class="howto-section">
+            <h3>🏆 Goal</h3>
+            <p>
+              Beat 12 floors of bosses to reach the endless mode. Collect skills
+              between fights and spend gold on permanent upgrades!
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <canvas id="cv"></canvas>
+    <noscript>Please enable JavaScript to play.</noscript>
+
+    <!-- Scripts -->
+    <script src="script/menu.js"></script>
+    <script src="script/game.js"></script>
+  </body>
 </html>
