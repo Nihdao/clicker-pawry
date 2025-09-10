@@ -23,11 +23,12 @@
       <div class="start-card">
         <h1 id="t" class="title">Clicker Pawry</h1>
         <p class="tagline">A Black Cat Clicker Roguelite with Parry Timing</p>
+        <div id="record-display" class="record-display" style="display: none">
+          <span class="record-label">🏆 Best Record:</span>
+          <span id="record-value" class="record-value">Floor 0</span>
+        </div>
         <div class="btns">
-          <button id="btn-new" class="btn">🐾 New Game</button>
-          <button id="btn-continue" class="btn alt" style="display: none">
-            📦 Continue
-          </button>
+          <button id="btn-new" class="btn">🐾 New Run</button>
           <button id="btn-howto" class="btn secondary">❓ How To Play</button>
           <button id="btn-clear" class="btn danger">🗑️ Clear Data</button>
         </div>
@@ -44,13 +45,10 @@
         <div class="modal-body">
           <div class="howto-section">
             <h3>🎯 Controls</h3>
-            <p><strong>Tap/Click on enemy:</strong> Attack (costs stamina)</p>
+            <p><strong>Tap/Click on ring:</strong> Parry incoming attacks</p>
             <p>
-              <strong>Tap/Click with ring timing:</strong> Parry incoming
-              attacks
-            </p>
-            <p>
-              <strong>Active Skills:</strong> Use the buttons in bottom-right
+              <strong>Berserk Mode:</strong> Spam click the central button for
+              massive damage!
             </p>
           </div>
           <div class="howto-section">
@@ -59,35 +57,34 @@
               <strong>White rings:</strong> Normal attacks - parry to avoid
               damage
             </p>
-            <p>
-              <strong>Blue rings:</strong> Feints - don't attack during the
-              first 200ms!
-            </p>
             <p><strong>Red rings:</strong> Heavy attacks - MUST be parried</p>
-          </div>
-          <div class="howto-section">
-            <h3>🎮 Parry Timing</h3>
             <p>
-              <strong>Perfect (±80ms):</strong> Counter attack for 2× damage
+              <strong>Perfect Parry:</strong> Deal 2× damage and avoid damage
             </p>
-            <p><strong>Good (±160ms):</strong> Block the attack</p>
-            <p><strong>Miss:</strong> Take damage</p>
+            <p>
+              <strong>Good Parry:</strong> Block the attack but deal normal
+              damage
+            </p>
           </div>
           <div class="howto-section">
             <h3>🏆 Goal</h3>
             <p>
-              Beat 12 floors of bosses to reach the endless mode. Collect skills
-              between fights and spend gold on permanent upgrades!
+              Beat 12 floors of bosses to reach the endless mode. Spend gold on
+              permanent upgrades to get stronger!
             </p>
           </div>
         </div>
       </div>
     </div>
 
-    <canvas id="cv"></canvas>
+    <!-- Game container (hidden initially) -->
+    <div id="game-container" class="game-container" style="display: none">
+      <canvas id="cv"></canvas>
+    </div>
     <noscript>Please enable JavaScript to play.</noscript>
 
     <!-- Scripts -->
+    <script src="script/constants.js"></script>
     <script src="script/menu.js"></script>
     <script src="script/game.js"></script>
   </body>

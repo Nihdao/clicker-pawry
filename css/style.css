@@ -3,9 +3,9 @@
 /* Variables CSS - Palette de couleurs */
 :root {
   /* Palette sombre pour échiquier */
-  --bg: #111111;
-  --p1: #6b7bb8; /* bleu plus clair pour les cases claires */
-  --p2: #3a4374; /* bleu plus foncé pour les cases sombres */
+  --bg: #050505; /* Encore plus sombre */
+  --p1: #4a5a8a; /* bleu plus clair pour les cases claires */
+  --p2: #3a4f7a; /* bleu plus clair pour les cases sombres */
   --accent: #39a8ff; /* bleu accent */
   --accent2: #e34a4a; /* rouge accent */
 }
@@ -16,9 +16,14 @@ body {
   height: 100%;
 }
 
+* {
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+}
+
 body {
   margin: 0;
   color: #fff;
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
   /* Échiquier parfait avec mouvement diagonal */
   background: 
     /* Création de l'échiquier avec masque */ repeating-conic-gradient(
@@ -82,6 +87,31 @@ body {
   font-size: 0.95rem;
 }
 
+.record-display {
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid #ffd700;
+  border-radius: 8px;
+  padding: 8px 16px;
+  margin-bottom: 20px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.record-label {
+  color: #ffd700;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.record-value {
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+}
+
 .btns {
   display: grid;
   gap: 10px;
@@ -97,7 +127,7 @@ button.btn {
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  color: #111;
+  color: #dedede;
   background: var(--p1);
   transition: transform 0.06s ease, box-shadow 0.2s ease, background 0.3s ease;
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
@@ -211,4 +241,37 @@ button.btn[disabled] {
 
 .howto-section p strong {
   color: #fff;
+}
+
+/* Game Container */
+.game-container {
+  width: 100%;
+  height: 100vh;
+  /* Use the exact same animated background as the main menu (body) */
+  background: 
+    /* Création de l'échiquier avec masque */ repeating-conic-gradient(
+        var(--p1) 0% 25%,
+        var(--p2) 25% 50%
+      )
+      0 0/100px 100px,
+    repeating-conic-gradient(var(--p2) 0% 25%, var(--p1) 25% 50%) 50px 50px/100px
+      100px;
+  animation: checkerboard-diagonal 25s linear infinite;
+  display: flex;
+  justify-content: center;
+  align-items: stretch; /* Changed from center to stretch */
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999;
+  padding: 0; /* Remove any padding */
+}
+
+.game-container canvas {
+  width: 100%;
+  height: 100%;
+  /* Remove border and radius for full coverage */
+  /* border: 2px solid var(--accent);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); */
 }

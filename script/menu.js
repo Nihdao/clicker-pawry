@@ -7,31 +7,60 @@
   const SAVE_KEY = "js13k25_clickerpawry";
   const start = document.getElementById("start");
   const btnNew = document.getElementById("btn-new");
-  const btnCont = document.getElementById("btn-continue");
   const btnHowto = document.getElementById("btn-howto");
   const btnClear = document.getElementById("btn-clear");
   const howtoModal = document.getElementById("howto-modal");
   const closeHowto = document.getElementById("close-howto");
+  const recordDisplay = document.getElementById("record-display");
+  const recordValue = document.getElementById("record-value");
 
-  // Check for save data presence
-  function checkSaveData() {
-    const hasSave = !!localStorage.getItem(SAVE_KEY);
-    btnCont.style.display = hasSave ? "block" : "none";
+  // Load and display record
+  function loadAndDisplayRecord() {
+    try {
+      const persistentData = localStorage.getItem(SAVE_KEY);
+      console.log(
+        "Loading record from localStorage:",
+        SAVE_KEY,
+        persistentData
+      );
+      if (persistentData) {
+        const data = JSON.parse(persistentData);
+        const highestFloor = data.highestFloor || 0;
+        console.log("Parsed data:", data, "highestFloor:", highestFloor);
+        if (highestFloor > 0) {
+          recordValue.textContent = `Floor ${highestFloor}`;
+          recordDisplay.style.display = "flex";
+          console.log("Record displayed:", highestFloor);
+        } else {
+          recordDisplay.style.display = "none";
+          console.log("No record to display");
+        }
+      } else {
+        recordDisplay.style.display = "none";
+        console.log("No persistent data found");
+      }
+    } catch (e) {
+      console.warn("Could not load record:", e);
+      recordDisplay.style.display = "none";
+    }
   }
 
-  // Initialize button states
-  checkSaveData();
+  // Load record on page load
+  loadAndDisplayRecord();
 
-  function begin(mode) {
-    // Hide start screen and focus canvas
+  // Expose function globally for game to update record
+  window.updateRecordDisplay = loadAndDisplayRecord;
+
+  function begin() {
+    // Hide start screen and show game container
     start.style.display = "none";
+    const gameContainer = document.getElementById("game-container");
+    if (gameContainer) {
+      gameContainer.style.display = "flex";
+    }
     const cv = document.getElementById("cv");
     if (cv && cv.focus) cv.focus();
-    // Let game logic handle loading/reloading (game.js)
-    // Here we notify intent via a lightweight flag if needed
-    try {
-      sessionStorage.setItem("cp_start_mode", mode);
-    } catch {}
+    // Game will automatically load from localStorage if available
   }
 
   // Modal management
@@ -46,8 +75,7 @@
   }
 
   // Event listeners
-  btnNew.addEventListener("click", () => begin("new"));
-  btnCont.addEventListener("click", () => begin("continue"));
+  btnNew.addEventListener("click", () => begin());
 
   btnHowto.addEventListener("click", () => showModal(howtoModal));
   closeHowto.addEventListener("click", () => hideModal(howtoModal));
@@ -70,9 +98,10 @@
           localStorage.removeItem(key);
         }
       });
-      // Update display
-      checkSaveData();
+      // Data cleared successfully
       alert("✅ Data deleted successfully!");
+      // Reload the page to ensure clean state
+      window.location.reload();
     }
   });
 
