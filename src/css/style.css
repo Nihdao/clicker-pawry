@@ -1,0 +1,218 @@
+:root {
+  --bg: #050505;
+  --p1: #4a5a8a;
+  --p2: #3a4f7a;
+  --accent: #39a8ff;
+  --accent2: #e34a4a;
+}
+html,
+body {
+  height: 100%;
+}
+* {
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+}
+body {
+  margin: 0;
+  color: #fff;
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  background: repeating-conic-gradient(var(--p1) 0% 25%, var(--p2) 25% 50%) 0 0/100px
+      100px,
+    repeating-conic-gradient(var(--p2) 0% 25%, var(--p1) 25% 50%) 50px 50px/100px
+      100px;
+  animation: cd 25s linear infinite;
+}
+#cv {
+  display: block;
+  max-width: 100vw;
+  max-height: 100vh;
+}
+@keyframes cd {
+  0% {
+    background-position: 0 0, 50px 50px;
+  }
+  100% {
+    background-position: 100px 100px, 150px 150px;
+  }
+}
+.start-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  color: #111;
+  background: transparent;
+}
+.start-card {
+  background: rgba(17, 17, 17, 0.9);
+  color: #fff;
+  padding: 24px 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  width: min(92vw, 420px);
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.title {
+  margin: 0 0 6px 0;
+  font-size: 1.6rem;
+  letter-spacing: 0.5px;
+}
+.tagline {
+  margin: 0 0 16px 0;
+  color: #cfd8e3;
+  font-size: 0.95rem;
+}
+.record-display {
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid #ffd700;
+  border-radius: 8px;
+  padding: 8px 16px;
+  margin-bottom: 20px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.record-label {
+  color: #ffd700;
+  font-size: 14px;
+  font-weight: bold;
+}
+.record-value {
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+}
+.btns {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+button.btn {
+  appearance: none;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #dedede;
+  background: var(--p1);
+  transition: transform 0.06s ease, box-shadow 0.2s ease, background 0.3s ease;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
+}
+button.btn:hover {
+  transform: translateY(-1px);
+}
+button.btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+button.btn.alt {
+  background: var(--p2);
+}
+button.btn.secondary {
+  background: #555;
+  color: #fff;
+}
+button.btn.danger {
+  background: var(--accent2);
+  color: #fff;
+}
+button.btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.modal-content {
+  background: rgba(17, 17, 17, 0.95);
+  color: #fff;
+  padding: 0;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  width: min(90vw, 500px);
+  max-height: 80vh;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: var(--accent);
+}
+.close-btn {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+.modal-body {
+  padding: 20px 24px 24px;
+}
+.howto-section {
+  margin-bottom: 20px;
+}
+.howto-section:last-child {
+  margin-bottom: 0;
+}
+.howto-section h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  color: var(--accent);
+}
+.howto-section p {
+  margin: 4px 0;
+  line-height: 1.4;
+  color: #e0e0e0;
+}
+.howto-section p strong {
+  color: #fff;
+}
+.game-container {
+  width: 100%;
+  height: 100vh;
+  background: repeating-conic-gradient(var(--p1) 0% 25%, var(--p2) 25% 50%) 0 0/100px
+      100px,
+    repeating-conic-gradient(var(--p2) 0% 25%, var(--p1) 25% 50%) 50px 50px/100px
+      100px;
+  animation: cd 25s linear infinite;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999;
+  padding: 0;
+}
+.game-container canvas {
+  width: 100%;
+  height: 100%;
+}
