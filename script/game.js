@@ -224,27 +224,6 @@ class Player {
     this.saveToLocalStorage();
   }
 
-  addSkill(skillId, isLevelUp = false) {
-    if (isLevelUp) {
-      // Find existing skill and level it up
-      const existingSkill = this.skills.find((s) => s.id === skillId);
-      if (existingSkill && existingSkill.level < 4) {
-        existingSkill.level++;
-      }
-    } else {
-      // Add new skill if we have space
-      if (this.skills.length < 3) {
-        this.skills.push({
-          id: skillId,
-          level: 1,
-          type: "active", // Default type since skills system is removed
-          cooldownRemaining: 0,
-        });
-      }
-    }
-    this.saveRunState();
-  }
-
   // Meta-progression stat calculations
   getMaxStamina() {
     return (
@@ -492,7 +471,6 @@ class Ring {
     this.targetRadius = targetRadius;
     this.isActive = true;
     this.hasImpacted = false;
-    this.punishWindow = 0; // No punish windows anymore
 
     // Position will be set by GameState to avoid overlaps
     this.x = 0;
@@ -510,10 +488,6 @@ class Ring {
 
   hasReachedTarget(currentTime) {
     return this.getProgress(currentTime) >= 1;
-  }
-
-  isInPunishWindow(currentTime) {
-    return false; // No punish windows anymore
   }
 
   getParryTiming(currentTime, windowModifier = 1) {
@@ -613,6 +587,7 @@ class GameState {
       maxHp: Math.floor(baseHp),
       archetype: archetype,
       archetypeData: Constants.ENEMY_ARCHETYPES[archetype],
+      damageFlashUntil: 0, // For damage flash effect
     };
 
     // Reset combat state
@@ -629,36 +604,6 @@ class GameState {
     // All floors use random archetype
     const archetypes = Object.keys(Constants.ENEMY_ARCHETYPES);
     return archetypes[Math.floor(Math.random() * archetypes.length)];
-  }
-
-  canReroll() {
-    const baseCost = 5;
-    const increaseCost = 3;
-    const cost = baseCost + this.player.rerollsUsed * increaseCost;
-    const freeRerolls = this.player.metaUpgrades.freeRerolls || 0;
-
-    return this.player.rerollsUsed < freeRerolls || this.player.gold >= cost;
-  }
-
-  getRerollCost() {
-    const baseCost = 5;
-    const increaseCost = 3;
-    const cost = baseCost + this.player.rerollsUsed * increaseCost;
-    const freeRerolls = this.player.metaUpgrades.freeRerolls || 0;
-
-    return this.player.rerollsUsed < freeRerolls ? 0 : cost;
-  }
-
-  rerollDraft() {
-    if (this.canReroll()) {
-      const cost = this.getRerollCost();
-      if (cost > 0) {
-        this.player.gold -= cost;
-        this.player.saveToLocalStorage();
-      }
-      this.player.rerollsUsed++;
-      this.generateDraftChoices();
-    }
   }
 
   handleClick(x, y, currentTime) {
@@ -691,6 +636,9 @@ class GameState {
 
       // Deal damage to enemy
       this.currentEnemy.hp = Math.max(0, this.currentEnemy.hp - damage);
+
+      // Trigger damage flash effect
+      this.currentEnemy.damageFlashUntil = currentTime + 200; // Flash for 200ms
 
       // Check for victory
       if (this.currentEnemy.hp <= 0) {
@@ -726,8 +674,8 @@ class GameState {
       `Victory! Earned ${goldReward} gold. Next floor: ${this.player.currentFloor}`
     );
 
-    // Check if entering endless mode
-    if (this.player.currentFloor === 12) {
+    // Check if entering endless mode (after beating floor 13)
+    if (this.player.currentFloor === 13) {
       this.enteringEndlessMode = true;
     }
 
@@ -822,8 +770,8 @@ class GameState {
 
     // Endless scaling
     let reward = baseReward + perfectBonus;
-    if (this.player.currentFloor > 12) {
-      const endlessLevel = this.player.currentFloor - 12;
+    if (this.player.currentFloor > 13) {
+      const endlessLevel = this.player.currentFloor - 13;
       reward = Math.floor(reward * (1 + 0.1 * endlessLevel));
     }
 
@@ -835,16 +783,6 @@ class GameState {
     if (this.player) {
       this.player.update(deltaTime);
     }
-
-    // Update skill cooldowns
-    this.player.skills.forEach((skill) => {
-      if (skill.cooldownRemaining > 0) {
-        skill.cooldownRemaining = Math.max(
-          0,
-          skill.cooldownRemaining - deltaTime
-        );
-      }
-    });
 
     // Update combat system (only in fight state)
     if (
@@ -963,7 +901,7 @@ class GameState {
       typeof canvas !== "undefined" && canvas ? canvas.height : 600;
 
     // HUD zones to avoid
-    const topHUDHeight = 60; // HP bar + name
+    const topHUDHeight = 90; // HP bar + name (increased from 60 to 90)
     const bottomHUDHeight = 80; // Player HUD + buttons
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
@@ -1108,10 +1046,6 @@ class GameState {
 
     return duration;
   }
-
-  loadRunState() {
-    return this.player.loadRunState();
-  }
 }
 
 // Main game engine class
@@ -1124,10 +1058,6 @@ class GameEngine {
 
     // Visual feedback
     this.feedbackMessages = [];
-
-    // Tooltip system
-    this.hoveredSkill = null;
-    this.hoverStartTime = 0;
 
     // Screen shake and damage feedback
     this.screenShake = { x: 0, y: 0, duration: 0 };
@@ -1178,7 +1108,7 @@ class GameEngine {
   startGame() {
     // Always try to load from localStorage first
     const hasPersistentData = this.player.loadFromLocalStorage();
-    const hasRunData = this.gameState.loadRunState();
+    const hasRunData = this.player.loadRunState();
 
     if (hasPersistentData || hasRunData) {
       // Load existing progress
@@ -1208,11 +1138,6 @@ class GameEngine {
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       this.handleMouseMove(x, y);
-    });
-
-    canvas.addEventListener("mouseleave", () => {
-      this.hoveredSkill = null;
-      this.hoverStartTime = 0;
     });
 
     window.addEventListener("keydown", (e) => {
@@ -1262,39 +1187,7 @@ class GameEngine {
   }
 
   handleMouseMove(x, y) {
-    if (this.gameState.currentState !== "fight") {
-      this.hoveredSkill = null;
-      return;
-    }
-
-    // Check if mouse is over a skill slot
-    const slotSize = 55;
-    const slotSpacing = 65;
-    const slotsY = canvas.height - 90;
-    const slotsStartX = canvas.width - 3 * slotSpacing - 15;
-
-    let newHoveredSkill = null;
-
-    for (let i = 0; i < 3; i++) {
-      const slotX = slotsStartX + i * slotSpacing;
-      const skill = this.player.skills[i];
-
-      if (
-        skill &&
-        x >= slotX &&
-        x <= slotX + slotSize &&
-        y >= slotsY &&
-        y <= slotsY + slotSize
-      ) {
-        newHoveredSkill = { index: i, skill: skill };
-        break;
-      }
-    }
-
-    if (newHoveredSkill !== this.hoveredSkill) {
-      this.hoveredSkill = newHoveredSkill;
-      this.hoverStartTime = Date.now();
-    }
+    // Mouse move handling removed since skills system is removed
   }
 
   update(deltaTime) {
@@ -1682,7 +1575,7 @@ class GameEngine {
     const hpBarWidth = canvas.width * 0.6;
     const hpBarHeight = 8;
     const hpBarX = (canvas.width - hpBarWidth) / 2;
-    const hpBarY = 20;
+    const hpBarY = 50; // Increased from 20 to 50 for more space
 
     ctx.fillStyle = "#333";
     ctx.fillRect(hpBarX, hpBarY, hpBarWidth, hpBarHeight);
@@ -1706,24 +1599,50 @@ class GameEngine {
     ctx.font = getScaledFont(18, "bold");
     ctx.textAlign = "center";
     const archetypeName = enemy.archetypeData?.name || "Unknown";
-    ctx.fillText(archetypeName, canvas.width / 2, hpBarY - 5);
+    ctx.fillText(archetypeName, canvas.width / 2, hpBarY - 15); // Increased from -5 to -15 for more space
   }
 
   drawEnemyShape(archetype, centerX, centerY, radius) {
     ctx.save();
 
+    // Bounce effect - subtle floating animation
+    const bounceOffset = Math.sin(Date.now() * 0.003) * 3; // Slow bounce
+    const bounceY = centerY + bounceOffset;
+
+    // Damage flash effect
+    const currentTime = Date.now();
+    const isFlashing =
+      this.currentEnemy && currentTime < this.currentEnemy.damageFlashUntil;
+
+    if (isFlashing) {
+      // Red flash overlay
+      ctx.fillStyle = "rgba(255, 0, 0, 0.3)";
+      ctx.beginPath();
+      ctx.arc(centerX, bounceY, radius * 1.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Increased size (20% larger)
+    const enlargedRadius = radius * 1.2;
+
     // Try to use image first, fallback to circle if not loaded
     if (this.enemyImages[archetype]) {
       const img = this.enemyImages[archetype];
-      const imgSize = radius * 2;
-      ctx.drawImage(img, centerX - radius, centerY - radius, imgSize, imgSize);
+      const imgSize = enlargedRadius * 2;
+      ctx.drawImage(
+        img,
+        centerX - enlargedRadius,
+        bounceY - enlargedRadius,
+        imgSize,
+        imgSize
+      );
     } else {
       // Fallback to circle while image loads
       ctx.fillStyle = "#2b2b2b";
       ctx.strokeStyle = "#111";
       ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      ctx.arc(centerX, bounceY, enlargedRadius, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
     }
@@ -1852,83 +1771,6 @@ class GameEngine {
     });
   }
 
-  drawSkillSlots() {
-    const slotSize = 55; // Plus grand
-    const slotSpacing = 65;
-    const slotsY = canvas.height - 90;
-    const slotsStartX = canvas.width - 3 * slotSpacing - 15;
-
-    for (let i = 0; i < 3; i++) {
-      const x = slotsStartX + i * slotSpacing;
-      const skill = this.player.skills[i];
-
-      // Slot background with border
-      ctx.fillStyle = "#2a2a2a";
-      ctx.fillRect(x - 2, slotsY - 2, slotSize + 4, slotSize + 4);
-
-      let slotColor = "#1a1a1a";
-      if (skill) {
-        const isOnCooldown = skill.cooldownRemaining > 0;
-
-        if (isOnCooldown) {
-          slotColor = "#cc5500"; // Orange pour cooldown
-        } else {
-          slotColor = "#ff8800"; // Orange pour actif (default)
-        }
-      }
-
-      ctx.fillStyle = slotColor;
-      ctx.fillRect(x, slotsY, slotSize, slotSize);
-
-      if (skill) {
-        // Acronyme du skill (simplified since skills system is removed)
-        ctx.fillStyle = "#fff";
-        ctx.font = getScaledFont(12, "bold");
-        ctx.textAlign = "center";
-        ctx.fillText(
-          "SK" + skill.id, // Simple skill abbreviation
-          x + slotSize / 2,
-          slotsY + slotSize / 2 - 3
-        );
-
-        // Niveau
-        ctx.fillStyle = "#fff";
-        ctx.font = getScaledFont(10);
-        ctx.fillText(
-          `Lv${skill.level}`,
-          x + slotSize / 2,
-          slotsY + slotSize / 2 + 12
-        );
-
-        // Cooldown overlay et texte
-        if (skill.cooldownRemaining > 0) {
-          const skillCooldown = 15000; // Default cooldown since skills system is removed
-          const cooldownRatio = skill.cooldownRemaining / skillCooldown;
-          const overlayHeight = slotSize * cooldownRatio;
-
-          ctx.fillStyle = "rgba(0,0,0,0.6)";
-          ctx.fillRect(x, slotsY, slotSize, overlayHeight);
-
-          // Temps restant
-          const secondsLeft = Math.ceil(skill.cooldownRemaining / 1000);
-          ctx.fillStyle = "#fff";
-          ctx.font = getScaledFont(10);
-          ctx.fillText(`${secondsLeft}s`, x + slotSize / 2, slotsY + 15);
-        }
-      }
-
-      // Slot number
-      ctx.fillStyle = "#888";
-      ctx.font = getScaledFont(10);
-      ctx.textAlign = "center";
-      ctx.fillText(
-        (i + 1).toString(),
-        x + slotSize / 2,
-        slotsY + slotSize + 15
-      );
-    }
-  }
-
   drawParticles() {
     this.particles.forEach((particle) => {
       particle.draw(ctx);
@@ -1939,56 +1781,6 @@ class GameEngine {
     this.pawEffects.forEach((pawEffect) => {
       pawEffect.draw(ctx);
     });
-  }
-
-  drawSkillTooltip() {
-    if (!this.hoveredSkill || Date.now() - this.hoverStartTime < 500) return; // 0.5s delay
-
-    const skill = this.hoveredSkill.skill;
-    // Skills system removed - using simplified data
-
-    // Tooltip position (above skill slots)
-    const tooltipWidth = 200;
-    const tooltipHeight = 80;
-    const slotSize = 55;
-    const slotSpacing = 65;
-    const slotsY = canvas.height - 90;
-    const slotsStartX = canvas.width - 3 * slotSpacing - 15;
-    const slotX = slotsStartX + this.hoveredSkill.index * slotSpacing;
-
-    const tooltipX = Math.max(
-      10,
-      Math.min(
-        canvas.width - tooltipWidth - 10,
-        slotX - tooltipWidth / 2 + slotSize / 2
-      )
-    );
-    const tooltipY = slotsY - tooltipHeight - 10;
-
-    // Background
-    ctx.fillStyle = "rgba(0, 0, 0, 0.9)";
-    ctx.fillRect(tooltipX, tooltipY, tooltipWidth, tooltipHeight);
-
-    // Border
-    ctx.strokeStyle = "#39a8ff";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(tooltipX, tooltipY, tooltipWidth, tooltipHeight);
-
-    // Skill name (simplified since skills system is removed)
-    ctx.fillStyle = "#fff";
-    ctx.font = getScaledFont(14, "bold");
-    ctx.textAlign = "left";
-    ctx.fillText(`Skill ${skill.id}`, tooltipX + 10, tooltipY + 20);
-
-    // Type and level
-    ctx.fillStyle = "#ccc";
-    ctx.font = getScaledFont(12);
-    ctx.fillText(`Active - Level ${skill.level}`, tooltipX + 10, tooltipY + 38);
-
-    // Description
-    ctx.fillStyle = "#fff";
-    ctx.font = getScaledFont(11);
-    ctx.fillText("Skill system removed", tooltipX + 10, tooltipY + 55);
   }
 
   drawMetaUpgrades() {
@@ -2127,21 +1919,6 @@ class GameEngine {
     ctx.fillText("Start Run", canvas.width / 2, buttonY + 32);
   }
 
-  drawRerollButton() {
-    if (!this.gameState.canReroll()) return;
-
-    const cost = this.gameState.getRerollCost();
-    const text = cost > 0 ? `Reroll (${cost}g)` : "Reroll (Free)";
-
-    ctx.fillStyle = "#666";
-    ctx.fillRect(20, canvas.height - 60, 120, 40);
-
-    ctx.fillStyle = "#fff";
-    ctx.font = '12px Arial, "Helvetica Neue", Helvetica, sans-serif';
-    ctx.textAlign = "center";
-    ctx.fillText(text, 80, canvas.height - 35);
-  }
-
   drawVictoryStats() {
     ctx.fillStyle = "#6ab8ff";
     ctx.font = '18px Arial, "Helvetica Neue", Helvetica, sans-serif';
@@ -2278,8 +2055,6 @@ class GameEngine {
         this.gameState.selectDraftChoice(index);
       }
     });
-
-    // No reroll button in the new system
   }
 
   handleFightInput(x, y, currentTime) {
@@ -2407,12 +2182,12 @@ class GameEngine {
     ctx.fillStyle = "#fff";
     ctx.font = 'bold 24px Arial, "Helvetica Neue", Helvetica, sans-serif';
     ctx.textAlign = "center";
-    ctx.fillText("⚡", centerX, centerY + 8);
+    ctx.fillText("!", centerX, centerY + 8);
 
     // Instruction text
     ctx.fillStyle = "#fff";
     ctx.font = '12px Arial, "Helvetica Neue", Helvetica, sans-serif';
-    ctx.fillText("SPAM CLICK!", centerX, centerY + currentRadius + 20);
+    ctx.fillText("SPAM!", centerX, centerY + currentRadius + 20);
   }
 }
 
